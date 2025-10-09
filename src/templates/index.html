@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوت تعلم اللغة الصينية - Chinese Learning Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">🇨🇳</span>
+                    <h1>بوت تعلم اللغة الصينية</h1>
+                </div>
+                <div class="header-actions">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="ابحث في المحتوى..." class="search-input">
+                        <button class="search-btn" onclick="performSearch()">🔍</button>
+                    </div>
+                    <a href="https://t.me/YOUR_BOT_USERNAME" target="_blank" class="telegram-btn">
+                        <span>افتح في تليجرام</span>
+                        <span class="telegram-icon">✈️</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">تعلم اللغة الصينية بسهولة</h2>
+                <p class="hero-description">
+                    منصة تعليمية شاملة تحتوي على دروس HSK، القرآن الكريم بالصينية، قواعد اللغة، محادثات، واختبارات تفاعلية
+                </p>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalSections">0</div>
+                        <div class="stat-label">قسم تعليمي</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalItems">0</div>
+                        <div class="stat-label">محتوى تعليمي</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="sectionsWithContent">0</div>
+                        <div class="stat-label">قسم نشط</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Results -->
+    <section class="search-results" id="searchResults" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h3>نتائج البحث</h3>
+                <button class="close-search" onclick="closeSearch()">✕</button>
+            </div>
+            <div id="searchResultsContent" class="items-grid"></div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories">
+        <div class="container">
+            <div class="section-header">
+                <h3>الأقسام التعليمية</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">الكل</button>
+                    <button class="filter-btn" data-category="HSK">HSK</button>
+                    <button class="filter-btn" data-category="محتوى">محتوى</button>
+                    <button class="filter-btn" data-category="تعليم">تعليم</button>
+                    <button class="filter-btn" data-category="تدريب">تدريب</button>
+                </div>
+            </div>
+            <div class="sections-grid" id="sectionsGrid">
+                <!-- Sections will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Modal -->
+    <div class="modal" id="sectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Modal -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="itemModalTitle"></h3>
+                <button class="modal-close" onclick="closeItemModal()">✕</button>
+            </div>
+            <div class="modal-body" id="itemModalBody">
+                <!-- Item content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>عن البوت</h4>
+                    <p>بوت تعليمي شامل لتعلم اللغة الصينية مع محتوى متنوع وتفاعلي</p>
+                </div>
+                <div class="footer-section">
+                    <h4>روابط سريعة</h4>
+                    <ul>
+                        <li><a href="#hero">الرئيسية</a></li>
+                        <li><a href="#categories">الأقسام</a></li>
+                        <li><a href="https://t.me/YOUR_BOT_USERNAME" target="_blank">تليجرام</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>تواصل معنا</h4>
+                    <p>للاستفسارات والدعم الفني</p>
+                    <a href="https://t.me/YOUR_SUPPORT" class="contact-link">تواصل عبر تليجرام</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 بوت تعلم اللغة الصينية. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
