@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: chinese-learning-bot-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn web_app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+    
+  - type: worker
+    name: chinese-learning-bot-telegram
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: ADMIN_USER_IDS
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
