@@ -8,8 +8,12 @@ from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-# Initialize OpenAI client
-client = OpenAI()
+# Initialize Groq client (compatible with OpenAI API)
+# Groq is FREE and FAST! 🚀
+client = OpenAI(
+    api_key=os.environ.get("GROQ_API_KEY", ""),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 # System prompts for different modes
 SYSTEM_PROMPTS = {
@@ -108,9 +112,9 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Add current message
         messages.append({"role": "user", "content": user_message})
         
-        # Call OpenAI API
+        # Call Groq API (FREE and FAST!)
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="llama-3.3-70b-versatile",  # Groq's free model
             messages=messages,
             max_tokens=500,
             temperature=0.7
