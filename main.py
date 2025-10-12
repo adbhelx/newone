@@ -10,6 +10,16 @@ from telegram.ext import (
     filters
 )
 from config import TOKEN, ADMIN_USER_IDS
+from ai_chat_feature import (
+    ai_chat_start, ai_mode_select, ai_chat_message, 
+    ai_chat_stop, ai_chat_stats
+)
+from achievements_system import AchievementSystem, format_achievement_notification
+from text_to_speech_feature import (
+    text_to_speech_start, text_to_speech_message, text_to_speech_stop
+)
+
+
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -56,6 +66,9 @@ def build_main_menu():
         ("❓ كويزات", "MENU_Quizzes"),
         ("📷 معجم صور", "MENU_PictureDictionary"),
         ("📱 التطبيقات", "MENU_Apps"),
+        ("🤖 AI Chat", "MENU_AI_CHAT"),
+        ("🏆 الإنجازات", "MENU_ACHIEVEMENTS"),
+        ("🔊 نطق صوتي", "MENU_TTS"),
         ("⚙️ Admin", "MENU_Admin")
     ]
     kb, row = [], []
@@ -121,6 +134,18 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if d == "BACK":
         return await start(update, context)
 
+    # AI Chat
+    if d == "MENU_AI_CHAT":
+        return await ai_chat_start(update, context)
+
+    # Achievements
+    if d == "MENU_ACHIEVEMENTS":
+        return await show_achievements(update, context)
+
+    # Text-to-Speech
+    if d == "MENU_TTS":
+        return await text_to_speech_start(update, context)
+
     # Admin panel
     if d == "MENU_Admin":
         if not is_admin(q.from_user.id):
@@ -152,6 +177,30 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await q.edit_message_text(f"قسم {sec}:", reply_markup=InlineKeyboardMarkup(kb))
 
 # view item -> send document by file_id
+async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.callback_query
+    await q.answer()
+    user_id = q.from_user.id
+    achievement_system = AchievementSystem(user_id)
+
+    summary = achievement_system.get_achievement_summary()
+    unlocked_achievements = achievement_system.get_unlocked_achievements()
+    locked_achievements = achievement_system.get_locked_achievements()
+
+    text = summary
+    if unlocked_achievements:
+        text += "\n\n🌟 **إنجازاتك المفتوحة:**\n"
+        for ach in unlocked_achievements:
+            text += f"{ach['icon']} {ach['name']}\n"
+    
+    if locked_achievements:
+        text += "\n\n🔒 **إنجازات لم تفتح بعد:**\n"
+        for ach in locked_achievements:
+            progress_bar = "█" * int(ach['progress'] / 10) + "░" * (10 - int(ach['progress'] / 10))
+            text += f"{ach['icon']} {ach['name']} ({ach['current']}/{ach['target']})\n`{progress_bar}` {ach['progress']:.0f}%\n"
+
+    await q.edit_message_text(text, parse_mode='Markdown', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]]))
+
 async def view_i(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
@@ -316,5 +365,14 @@ app.add_handler(ConversationHandler(
     },
     fallbacks=[]
 ))
+
+app.add_handler(CommandHandler("ai_chat", ai_chat_start))
+app.add_handler(CommandHandler("stop_ai", ai_chat_stop))
+app.add_handler(CommandHandler("ai_stats", ai_chat_stats))
+app.add_handler(CallbackQueryHandler(ai_mode_select, pattern=r"^ai_mode_"))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_message))
+app.add_handler(CommandHandler("tts", text_to_speech_start))
+app.add_handler(CommandHandler("stop_tts", text_to_speech_stop))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_to_speech_message))
 
 app.run_polling()
