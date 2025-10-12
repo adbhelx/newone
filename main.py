@@ -22,6 +22,10 @@ from text_to_speech_feature import (
 from daily_reminders_feature import (
     start_reminders_setup, set_daily_reminder, re_schedule_all_reminders
 )
+from word_matching_game import (
+    start_word_matching_game, check_answer, end_word_matching_game, SELECTING_ANSWER
+)
+
 
 
 
@@ -75,6 +79,7 @@ def build_main_menu():
         ("🏆 الإنجازات", "MENU_ACHIEVEMENTS"),
         ("🔊 نطق صوتي", "MENU_TTS"),
         ("🔔 تذكيرات", "MENU_REMINDERS"),
+        ("🎮 لعبة كلمات", "MENU_WORD_GAME"),
         ("⚙️ Admin", "MENU_Admin")
     ]
     kb, row = [], []
@@ -387,6 +392,19 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_to_speech_m
 
 app.add_handler(CommandHandler("remind", start_reminders_setup))
 app.add_handler(CallbackQueryHandler(set_daily_reminder, pattern=r"^set_reminder_|^cancel_reminder"))
+
+word_matching_conv_handler = ConversationHandler(
+    entry_points=[CallbackQueryHandler(start_word_matching_game, pattern="^MENU_WORD_GAME$")],
+    states={
+        SELECTING_ANSWER: [
+            CallbackQueryHandler(check_answer, pattern=r"^game_answer_"),
+            CallbackQueryHandler(end_word_matching_game, pattern="^game_end$")
+        ]
+    },
+    fallbacks=[CommandHandler("cancel", end_word_matching_game)]
+)
+app.add_handler(word_matching_conv_handler)
+
 
 app.run_polling()
 
