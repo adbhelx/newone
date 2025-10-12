@@ -15,9 +15,14 @@ from ai_chat_feature import (
     ai_chat_stop, ai_chat_stats
 )
 from achievements_system import AchievementSystem, format_achievement_notification
+
 from text_to_speech_feature import (
     text_to_speech_start, text_to_speech_message, text_to_speech_stop
 )
+from daily_reminders_feature import (
+    start_reminders_setup, set_daily_reminder, re_schedule_all_reminders
+)
+
 
 
 
@@ -69,6 +74,7 @@ def build_main_menu():
         ("🤖 AI Chat", "MENU_AI_CHAT"),
         ("🏆 الإنجازات", "MENU_ACHIEVEMENTS"),
         ("🔊 نطق صوتي", "MENU_TTS"),
+        ("🔔 تذكيرات", "MENU_REMINDERS"),
         ("⚙️ Admin", "MENU_Admin")
     ]
     kb, row = [], []
@@ -145,6 +151,10 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Text-to-Speech
     if d == "MENU_TTS":
         return await text_to_speech_start(update, context)
+
+    # Daily Reminders
+    if d == "MENU_REMINDERS":
+        return await start_reminders_setup(update, context)
 
     # Admin panel
     if d == "MENU_Admin":
@@ -375,4 +385,10 @@ app.add_handler(CommandHandler("tts", text_to_speech_start))
 app.add_handler(CommandHandler("stop_tts", text_to_speech_stop))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_to_speech_message))
 
+app.add_handler(CommandHandler("remind", start_reminders_setup))
+app.add_handler(CallbackQueryHandler(set_daily_reminder, pattern=r"^set_reminder_|^cancel_reminder"))
+
 app.run_polling()
+
+# Re-schedule reminders on bot restart
+app.post_init(re_schedule_all_reminders)
