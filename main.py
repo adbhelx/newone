@@ -25,6 +25,8 @@ from daily_reminders_feature import (
 from word_matching_game import (
     start_word_matching_game, check_answer, end_word_matching_game, SELECTING_ANSWER
 )
+from leaderboard_feature import show_leaderboard
+
 
 
 
@@ -80,6 +82,7 @@ def build_main_menu():
         ("🔊 نطق صوتي", "MENU_TTS"),
         ("🔔 تذكيرات", "MENU_REMINDERS"),
         ("🎮 لعبة كلمات", "MENU_WORD_GAME"),
+        ("🏅 لوحة الصدارة", "MENU_LEADERBOARD"),
         ("⚙️ Admin", "MENU_Admin")
     ]
     kb, row = [], []
@@ -160,6 +163,10 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Daily Reminders
     if d == "MENU_REMINDERS":
         return await start_reminders_setup(update, context)
+
+    # Leaderboard
+    if d == "MENU_LEADERBOARD":
+        return await show_leaderboard(update, context)
 
     # Admin panel
     if d == "MENU_Admin":
