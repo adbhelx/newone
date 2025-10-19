@@ -1,3 +1,4 @@
+
 """
 ميزة المحادثة الذكية بالذكاء الاصطناعي
 AI Chat Feature - أولوية عالية للتنفيذ
@@ -57,7 +58,7 @@ async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "💬 **محادثة**: للممارسة الطبيعية\n"
         "🔤 **مترجم**: للترجمة الفورية",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode='Markdown'
+        parse_mode=\'Markdown\'
     )
 
 async def ai_mode_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -114,7 +115,7 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Call Groq API (FREE and FAST!)
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Groq's free model
+            model="llama-3.3-70b-versatile",  # Groq\'s free model
             messages=messages,
             max_tokens=500,
             temperature=0.7
@@ -128,7 +129,7 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["ai_history"] = history
         
         # Send response
-        await update.message.reply_text(ai_response, parse_mode='Markdown')
+        await update.message.reply_text(ai_response, parse_mode=\'Markdown\')
         
     except Exception as e:
         await update.message.reply_text(
@@ -164,9 +165,9 @@ async def ai_chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages_count = len(history) // 2
     
     mode_names = {
-        "teacher": "🎓 المعلم",
-        "conversation": "💬 المحادثة",
-        "translator": "🔤 المترجم"
+        "teacher": "🎓 وضع المعلم",
+        "conversation": "💬 وضع المحادثة",
+        "translator": "🔤 وضع المترجم"
     }
     
     await update.message.reply_text(
@@ -203,3 +204,4 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_message)
 7. Context awareness: فهم السياق من المحادثات السابقة
 8. Multi-modal: دعم النص والصوت والصورة معاً
 """
+
