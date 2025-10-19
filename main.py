@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 # Data file
 DB = "data.json"
 if os.path.exists(DB):
-    with open(DB, encoding=\'utf-8\') as f:
+    with open(DB, encoding='utf-8') as f:
         data = json.load(f)
 else:
     keys = [
@@ -51,14 +51,14 @@ else:
         "Applications"
     ]
     data = {k: [] for k in keys}
-    with open(DB, \'w\', encoding=\'utf-8\') as f:
+    with open(DB, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 # Conversation states
 ADMIN_SECTION, ADMIN_TITLE, ADMIN_CONTENT, UPLOAD_FILE = range(4)
 
 def save():
-    with open(DB, \'w\', encoding=\'utf-8\') as f:
+    with open(DB, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def is_admin(user_id):
@@ -188,7 +188,7 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         items = data.get(sec, [])
         kb, row = [], []
         for it in items:
-            row.append(InlineKeyboardButton(it["title"], callback_data=f"VIEW_{sec}_{it[\'id\']}"))
+            row.append(InlineKeyboardButton(it["title"], callback_data=f"VIEW_{sec}_{it['id']}"))
             if len(row) == 2:
                 kb.append(row)
                 row = []
@@ -214,25 +214,25 @@ async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if unlocked_achievements:
         text += "\n\n🌟 **إنجازاتك المفتوحة:**\n"
         for ach in unlocked_achievements:
-            text += f"{ach[\'icon\']} {ach[\'name\']}\n"
+            text += f"{ach['icon']} {ach['name']}\n"
     
     if locked_achievements:
         text += "\n\n🔒 **إنجازات لم تفتح بعد:**\n"
         for ach in locked_achievements:
-            progress_bar = "█" * int(ach[\'progress\'] / 10) + "░" * (10 - int(ach[\'progress\'] / 10))
-            text += f"{ach[\'icon\']} {ach[\'name\']} ({ach[\'current\']}/{ach[\'target\']})\n`{progress_bar}` {ach[\'progress\']:.0f}%\n"
+            progress_bar = "█" * int(ach['progress'] / 10) + "░" * (10 - int(ach['progress'] / 10))
+            text += f"{ach['icon']} {ach['name']} ({ach['current']}/{ach['target']})\n`{progress_bar}` {ach['progress']:.0f}%\n"
 
-    await q.edit_message_text(text, parse_mode=\'Markdown\', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]]))
+    await q.edit_message_text(text, parse_mode='Markdown', reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]]))
 
 async def view_i(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
     _, sec, sid = q.data.split("_")
     idx = int(sid)
-    itm = next((x for x in data.get(sec, []) if x[\'id\'] == idx), None)
+    itm = next((x for x in data.get(sec, []) if x['id'] == idx), None)
     if not itm:
         return await q.edit_message_text("⚠️ غير موجود.")
-    await q.message.reply_document(document=itm[\'content\'], filename=itm[\'title\'])
+    await q.message.reply_document(document=itm['content'], filename=itm['title'])
     return await main_h(update, context)
 
 # 1) Add item
@@ -247,20 +247,20 @@ async def adm_add_start(update: Update, context):
 async def adm_add_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
+    context.user_data['sec'] = q.data.split("_", 1)[1]
     await q.edit_message_text("✏️ أرسل عنوان العنصر:")
     return ADMIN_TITLE
 
 async def adm_add_title(update: Update, context):
-    context.user_data[\'title\'] = update.message.text
+    context.user_data['title'] = update.message.text
     await update.message.reply_text("🌐 أرسل محتوى (نص أو رابط أو file_id):")
     return ADMIN_CONTENT
 
 async def adm_add_cont(update: Update, context):
-    sec = context.user_data[\'sec\']
-    title = context.user_data[\'title\']
+    sec = context.user_data['sec']
+    title = context.user_data['title']
     content = update.message.text.strip()
-    nid = max([x[\'id\'] for x in data[sec]] or [0]) + 1
+    nid = max([x['id'] for x in data[sec]] or [0]) + 1
     data[sec].append({"id": nid, "title": title, "content": content})
     save()
     await update.message.reply_text(f"✅ أضيف إلى {sec}: {title}")
@@ -279,7 +279,7 @@ async def adm_view_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
     sec = q.data.split("_", 1)[1]
-    lst = "\n".join(f"- {i[\'title\']} (id={i[\'id\']})" for i in data[sec])
+    lst = "\n".join(f"- {i['title']} (id={i['id']})" for i in data[sec])
     await q.edit_message_text(f"عناصر {sec}:\n{lst}")
     return ConversationHandler.END
 
@@ -295,19 +295,19 @@ async def adm_del_start(update: Update, context):
 async def adm_del_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
+    context.user_data['sec'] = q.data.split("_", 1)[1]
     await q.edit_message_text("✏️ أرسل id العنصر لحذفه:")
     return ADMIN_TITLE
 
 async def adm_del_id(update: Update, context):
-    sec = context.user_data[\'sec\']
+    sec = context.user_data['sec']
     try:
         idx = int(update.message.text)
     except:
         await update.message.reply_text("⚠️ id خاطئ.")
         return ADMIN_TITLE
     before = len(data[sec])
-    data[sec] = [x for x in data[sec] if x[\'id\'] != idx]
+    data[sec] = [x for x in data[sec] if x['id'] != idx]
     save()
     if len(data[sec]) < before:
         await update.message.reply_text("✅ تم الحذف.")
@@ -327,13 +327,13 @@ async def adm_up_start(update: Update, context):
 async def adm_up_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
-    await q.edit_message_text(f"✏️ أرسل الملف للقسم {context.user_data[\'sec\']}:")
+    context.user_data['sec'] = q.data.split("_", 1)[1]
+    await q.edit_message_text(f"✏️ أرسل الملف للقسم {context.user_data['sec']}:")
     return UPLOAD_FILE
 
 async def adm_receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    sec = context.user_data[\'sec\']
+    sec = context.user_data['sec']
     if msg.document:
         fid, name = msg.document.file_id, msg.document.file_name
     elif msg.video:
@@ -345,10 +345,10 @@ async def adm_receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         return await msg.reply_text("⛔ أرسل ملف PDF/صوت/فيديو/صورة.")
 
-    nid = max([x[\'id\'] for x in data[sec]] or [0]) + 1
+    nid = max([x['id'] for x in data[sec]] or [0]) + 1
     data[sec].append({"id": nid, "title": name, "content": fid})
     save()
-    await msg.reply_text(f"✅ تم حفظ الملف في {sec}:\n`{name}`\nfile_id=`{fid}`", parse_mode=\'Markdown\')
+    await msg.reply_text(f"✅ تم حفظ الملف في {sec}:\n`{name}`\nfile_id=`{fid}`", parse_mode='Markdown')
     return ConversationHandler.END
 
 def main():
