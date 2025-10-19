@@ -351,7 +351,8 @@ async def adm_receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 # register handlers
-app = ApplicationBuilder().token(TOKEN).build()
+def main():
+    app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(main_h, pattern=r"^(MENU_|SEC_|BACK|SKIP_)"))
@@ -413,7 +414,12 @@ word_matching_conv_handler = ConversationHandler(
 app.add_handler(word_matching_conv_handler)
 
 
-app.run_polling()
+    return app
+
+if __name__ == '__main__':
+    app = main()
+    app.run_polling()
+
 
 # Re-schedule reminders on bot restart
 app.post_init(re_schedule_all_reminders)
