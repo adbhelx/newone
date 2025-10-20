@@ -1181,6 +1181,8 @@ app = Flask(__name__)
 
 # Telegram Bot Setup
 application = ApplicationBuilder().token(TOKEN).build()
+application.initialize() # Initialize immediately after building
+logger.info("Telegram bot Application initialized.")
 
 # Add handlers
 application.add_handler(CommandHandler("start", start))
@@ -1406,38 +1408,26 @@ def health():
     })
 
 # Function to run the Telegram bot
-def run_bot_async_loop():
-    asyncio.run(application.run_polling())
-
-def run_bot_webhook_mode():
-    logger.info("Starting Telegram bot in webhook mode...")
-    # Set webhook here. This is typically done once, not on every startup.
-    # However, if it needs to be set on every startup for Render, ensure it's idempotent.
-    # For Render, the webhook URL is usually the service's public URL + /webhook
-    # The application.run_webhook() method is used when running with Flask/Gunicorn
-    # The actual webhook handling is done in telegram_webhook Flask route.
-    # We only need to ensure the reminders are rescheduled.
-    asyncio.run(re_schedule_all_reminders(application))
-    logger.info("Telegram bot webhook mode initialized.")
+def run_bot_thread_target(app_instance):
+    logger.info("Telegram bot thread target started.")
+    # Run the reminder rescheduling in the bot's event loop
+    asyncio.run(re_schedule_all_reminders(app_instance))
+    logger.info("Telegram bot reminders rescheduled.")
+    # The bot doesn't need to run_polling() or run_webhook() here,
+    # as Flask handles incoming webhooks and passes them to application.process_update()
 
 # Start the Telegram bot in a separate thread
-# This thread will manage the bot's background tasks (like job_queue and webhook setup)
-telegram_bot_thread = threading.Thread(target=run_bot_webhook_mode)
+# This thread will manage the bot\'s background tasks (like job_queue and webhook setup)
+telegram_bot_thread = threading.Thread(target=run_bot_thread_target, args=(application,))
 telegram_bot_thread.daemon = True # Allow main program to exit even if thread is running
 
+# Start the bot thread globally, outside of if __name__ == '__main__':
+# This ensures it runs when gunicorn imports the module
+telegram_bot_thread.start()
+logger.info("Telegram bot thread started.")
+
 if __name__ == '__main__':
-    # Initialize the Application before starting the bot thread
-    # This is crucial for webhook mode when not using run_polling()
-    application.initialize()
-    logger.info("Telegram bot Application initialized.")
-
-    # Start the bot thread if not already started
-    if not telegram_bot_thread.is_alive():
-        telegram_bot_thread.start()
-        logger.info("Telegram bot thread started.")
-
-    # Run Flask app
-    port = int(os.environ.get('PORT', 5000))
+    # Run Flask app only if executed directly
+    port = int(os.environ.get(\'PORT\', 5000))
     logger.info(f"Flask app starting on port {port}")
-    app.run(host='0.0.0.0', port=port)
-
+    app.run(host=\'0.0.0.0\', port=port)
