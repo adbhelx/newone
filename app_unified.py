@@ -32,7 +32,7 @@ ADMIN_USER_IDS = [953696547, 7942066919]  # ضع هنا معرفات المست�
 # Data file (from main.py)
 DB = "data.json"
 if os.path.exists(DB):
-    with open(DB, encoding=\'utf-8\') as f:
+    with open(DB, encoding='utf-8') as f:
         data = json.load(f)
 else:
     keys = [
@@ -42,11 +42,11 @@ else:
         "Applications"
     ]
     data = {k: [] for k in keys}
-    with open(DB, \'w\', encoding=\'utf-8\') as f:
+    with open(DB, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def save():
-    with open(DB, \'w\', encoding=\'utf-8\') as f:
+    with open(DB, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 def is_admin(user_id):
@@ -102,7 +102,7 @@ async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "💬 **محادثة**: للممارسة الطبيعية\n"
         "🔤 **مترجم**: للترجمة الفورية",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=\'Markdown\'
+        parse_mode='Markdown'
     )
 
 async def ai_mode_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -162,7 +162,7 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         openai.api_base = "https://api.groq.com/openai/v1"
 
         response = openai.ChatCompletion.create(
-            model="llama-3.3-70b-versatile",  # Groq\'s free model
+            model="llama-3.3-70b-versatile",  # Groq's free model
             messages=messages,
             max_tokens=500,
             temperature=0.7
@@ -176,7 +176,7 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["ai_history"] = history
         
         # Send response
-        await update.message.reply_text(ai_response, parse_mode=\'Markdown\')
+        await update.message.reply_text(ai_response, parse_mode='Markdown')
         
     except Exception as e:
         await update.message.reply_text(
@@ -258,7 +258,7 @@ class AchievementSystem:
     def load_user_data(self) -> Dict:
         """Load user achievement data"""
         try:
-            with open(f"user_achievements_{self.user_id}.json", \'r\', encoding=\'utf-8\') as f:
+            with open(f"user_achievements_{self.user_id}.json", 'r', encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             return {
@@ -281,7 +281,7 @@ class AchievementSystem:
     
     def save_user_data(self):
         """Save user achievement data"""
-        with open(f"user_achievements_{self.user_id}.json", \'w\', encoding=\'utf-8\') as f:
+        with open(f"user_achievements_{self.user_id}.json", 'w', encoding='utf-8') as f:
             json.dump(self.user_data, f, ensure_ascii=False, indent=2)
     
     def update_stat(self, stat_name: str, value: int = 1):
@@ -368,18 +368,18 @@ class AchievementSystem:
         summary = f"""
 🏆 **ملخص الإنجازات**
 
-📊 المستوى: {level_info[\'icon\']} {level_info[\'name_ar\']} (المستوى {level_info[\'level\]})
-💎 النقاط: {level_info[\'points\]}
-🎯 التقدم للمستوى التالي: {level_info[\'progress\']:.1f}%
+📊 المستوى: {level_info['icon']} {level_info['name_ar']} (المستوى {level_info['level']})
+💎 النقاط: {level_info['points']}
+🎯 التقدم للمستوى التالي: {level_info['progress']:.1f}%
 🏅 الإنجازات: {unlocked_count}/{total_count}
 
 📈 **الإحصائيات:**
-• دروس مكتملة: {self.user_data[\'stats\'][\'lessons_completed\]}
-• كلمات متعلمة: {self.user_data[\'stats\'][\'words_learned\]}
-• سلسلة الأيام: {self.user_data[\'stats\'][\'streak_days\]} 🔥
-• اختبارات كاملة: {self.user_data[\'stats\'][\'perfect_quizzes\]}
-• قصص مقروءة: {self.user_data[\'stats\'][\'stories_read\]}
-• ساعات الدراسة: {self.user_data[\'stats\'][\'study_hours\]:.1f}
+• دروس مكتملة: {self.user_data['stats']['lessons_completed']}
+• كلمات متعلمة: {self.user_data['stats']['words_learned']}
+• سلسلة الأيام: {self.user_data['stats']['streak_days']} 🔥
+• اختبارات كاملة: {self.user_data['stats']['perfect_quizzes']}
+• قصص مقروءة: {self.user_data['stats']['stories_read']}
+• ساعات الدراسة: {self.user_data['stats']['study_hours']:.1f}
 """
         return summary
     
@@ -416,12 +416,12 @@ def format_achievement_notification(achievement: Dict) -> str:
     return f"""
 🎉 **إنجاز جديد مفتوح!**
 
-{achievement[\'icon\']} **{achievement[\'name\']}**
-{achievement[\'name_en\]}
+{achievement['icon']} **{achievement['name']}**
+{achievement['name_en']}
 
-{achievement[\'description\]}
+{achievement['description']}
 
-💎 +{achievement[\'points\]} نقطة
+💎 +{achievement['points']} نقطة
 """
 
 
@@ -437,7 +437,7 @@ async def text_to_speech_start(update: Update, context: ContextTypes.DEFAULT_TYP
         "أرسل لي أي نص صيني وسأقوم بنطقه لك.\n"
         "استخدم /stop_tts لإنهاء هذه الميزة.""",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=\'Markdown\'
+        parse_mode='Markdown'
     )
     context.user_data["tts_active"] = True
 
@@ -453,11 +453,11 @@ async def text_to_speech_message(update: Update, context: ContextTypes.DEFAULT_T
     await update.message.chat.send_action("record_audio")
 
     try:
-        tts = gTTS(text=text, lang=\'zh-CN\')
+        tts = gTTS(text=text, lang='zh-CN')
         audio_path = f"temp_audio_{update.effective_user.id}.mp3"
         tts.save(audio_path)
 
-        with open(audio_path, \'rb\') as audio_file:
+        with open(audio_path, 'rb') as audio_file:
             await update.message.reply_audio(audio=audio_file)
         
         os.remove(audio_path)
@@ -501,7 +501,7 @@ async def start_reminders_setup(update: Update, context: ContextTypes.DEFAULT_TY
         "اختر الوقت الذي تفضل أن أذكرك فيه بالدراسة:\n"
         "(يمكنك إلغاء التذكير في أي وقت)""",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=\'Markdown\'
+        parse_mode='Markdown'
     )
 
 async def set_daily_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -570,7 +570,7 @@ async def send_daily_reminder_message(context: ContextTypes.DEFAULT_TYPE):
         "**你好 (Nǐ hǎo) - مرحباً**\n\n"
         "استمر في التقدم! 🚀"""
     )
-    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode=\'Markdown\')
+    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
 
 async def re_schedule_all_reminders(application):
     reminders = load_reminders()
@@ -644,24 +644,24 @@ async def generate_new_question(update: Update, context: ContextTypes.DEFAULT_TY
 
     keyboard = []
     for i, word in enumerate(options):
-        keyboard.append([InlineKeyboardButton(f"{chr(65+i)}) {word[\'chinese\']}", callback_data=f"game_answer_{word[\'chinese\']}")])
+        keyboard.append([InlineKeyboardButton(f"{chr(65+i)}) {word['chinese']}", callback_data=f"game_answer_{word['chinese']}")])
     keyboard.append([InlineKeyboardButton("❌ إنهاء اللعبة", callback_data="game_end")])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     question_text = (
         f"🎮 **لعبة تطابق الكلمات!**\n\n"
-        f"ما معنى كلمة \"**{correct_word[\'arabic\']}**\" بالصينية؟\n\n"
-        f"**Pinyin:** {correct_word[\'pinyin\']}\n"
+        f"ما معنى كلمة \"**{correct_word['arabic']}**\" بالصينية؟\n\n"
+        f"**Pinyin:** {correct_word['pinyin']}\n"
     )
 
     if update.callback_query:
-        await update.callback_query.edit_message_text(question_text, reply_markup=reply_markup, parse_mode=\'Markdown\')
+        await update.callback_query.edit_message_text(question_text, reply_markup=reply_markup, parse_mode='Markdown')
     else:
-        await update.message.reply_text(question_text, reply_markup=reply_markup, parse_mode=\'Markdown\')
+        await update.message.reply_text(question_text, reply_markup=reply_markup, parse_mode='Markdown')
 
 async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Checks the user\'s answer for the word matching game"""
+    """Checks the user's answer for the word matching game"""
     query = update.callback_query
     await query.answer()
     
@@ -675,7 +675,7 @@ async def check_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await query.edit_message_text(
             f"❌ إجابة خاطئة. الإجابة الصحيحة كانت: **{correct_answer}**\n\nلنلعب جولة أخرى.",
-            parse_mode=\'Markdown\'
+            parse_mode='Markdown'
         )
         await generate_new_question(update, context)
         return SELECTING_ANSWER
@@ -709,7 +709,7 @@ def get_all_user_ids() -> List[int]:
 def load_user_points(user_id: int) -> int:
     """Load total points for a specific user."""
     try:
-        with open(f"{USER_ACHIEVEMENTS_PREFIX}{user_id}.json", \"r\", encoding=\"utf-8\") as f:
+        with open(f"{USER_ACHIEVEMENTS_PREFIX}{user_id}.json", "r", encoding="utf-8") as f:
             data = json.load(f)
             return data.get("total_points", 0)
     except FileNotFoundError:
@@ -750,13 +750,13 @@ async def show_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for i, entry in enumerate(leaderboard_data):
             
             if i == 0: # Gold medal for 1st place
-                leaderboard_text += f"🥇 1. {entry[\"username\"]}: **{entry[\"points\"]} نقطة**\n"
+                leaderboard_text += f"🥇 1. {entry['username']}: **{entry['points']} نقطة**\n"
             elif i == 1: # Silver medal for 2nd place
-                leaderboard_text += f"🥈 2. {entry[\"username\"]}: **{entry[\"points\"]} نقطة**\n"
+                leaderboard_text += f"🥈 2. {entry['username']}: **{entry['points']} نقطة**\n"
             elif i == 2: # Bronze medal for 3rd place
-                leaderboard_text += f"🥉 3. {entry[\"username\"]}: **{entry[\"points\"]} نقطة**\n"
+                leaderboard_text += f"🥉 3. {entry['username']}: **{entry['points']} نقطة**\n"
             else:
-                leaderboard_text += f"{i+1}. {entry[\"username\"]}: {entry[\"points\"]} نقطة\n"
+                leaderboard_text += f"{i+1}. {entry['username']}: {entry['points']} نقطة\n"
             
             if i >= 9: # Show top 10 only
                 break
@@ -767,9 +767,9 @@ async def show_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if query:
-        await query.edit_message_text(leaderboard_text, parse_mode=\'Markdown\', reply_markup=reply_markup)
+        await query.edit_message_text(leaderboard_text, parse_mode='Markdown', reply_markup=reply_markup)
     else:
-        await update.message.reply_text(leaderboard_text, parse_mode=\'Markdown\', reply_markup=reply_markup)
+        await update.message.reply_text(leaderboard_text, parse_mode='Markdown', reply_markup=reply_markup)
 
 
 # --- Content from main.py (core bot logic) ---
@@ -898,7 +898,7 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         items = data.get(sec, [])
         kb, row = [], []
         for it in items:
-            row.append(InlineKeyboardButton(it["title"], callback_data=f"VIEW_{sec}_{it[\'id\']}"))
+            row.append(InlineKeyboardButton(it["title"], callback_data=f"VIEW_{sec}_{it['id']}"))
             if len(row) == 2:
                 kb.append(row)
                 row = []
@@ -915,10 +915,10 @@ async def view_i(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await q.answer()
     _, sec, sid = q.data.split("_")
     idx = int(sid)
-    itm = next((x for x in data.get(sec, []) if x[\'id\'] == idx), None)
+    itm = next((x for x in data.get(sec, []) if x['id'] == idx), None)
     if not itm:
         return await q.edit_message_text("⚠️ غير موجود.")
-    await q.message.reply_document(document=itm[\'content\'], filename=itm[\'title\'])
+    await q.message.reply_document(document=itm['content'], filename=itm['title'])
     return await main_h(update, context)
 
 # 1) Add item
@@ -933,20 +933,20 @@ async def adm_add_start(update: Update, context):
 async def adm_add_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
+    context.user_data['sec'] = q.data.split("_", 1)[1]
     await q.edit_message_text("✏️ أرسل عنوان العنصر:")
     return ADMIN_TITLE
 
 async def adm_add_title(update: Update, context):
-    context.user_data[\'title\'] = update.message.text
+    context.user_data['title'] = update.message.text
     await update.message.reply_text("🌐 أرسل محتوى (نص أو رابط أو file_id):")
     return ADMIN_CONTENT
 
 async def adm_add_cont(update: Update, context):
-    sec = context.user_data[\'sec\']
-    title = context.user_data[\'title\']
+    sec = context.user_data['sec']
+    title = context.user_data['title']
     content = update.message.text.strip()
-    nid = max([x[\'id\'] for x in data[sec]] or [0]) + 1
+    nid = max([x['id'] for x in data[sec]] or [0]) + 1
     data[sec].append({"id": nid, "title": title, "content": content})
     save()
     await update.message.reply_text(f"✅ أضيف إلى {sec}: {title}")
@@ -965,7 +965,7 @@ async def adm_view_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
     sec = q.data.split("_", 1)[1]
-    lst = "\n".join(f"- {i[\'title\']} (id={i[\'id\']})" for i in data[sec])
+    lst = "\n".join(f"- {i['title']} (id={i['id']})" for i in data[sec])
     await q.edit_message_text(f"عناصر {sec}:\n{lst}")
     return ConversationHandler.END
 
@@ -981,20 +981,20 @@ async def adm_del_start(update: Update, context):
 async def adm_del_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
-    lst = "\n".join(f"- {i[\'title\']} (id={i[\'id\']})" for i in data[context.user_data[\'sec\']])
-    await q.edit_message_text(f"أرسل ID العنصر لحذفه من {context.user_data[\'sec\]}:\n{lst}")
+    context.user_data['sec'] = q.data.split("_", 1)[1]
+    lst = "\n".join(f"- {i['title']} (id={i['id']})" for i in data[context.user_data['sec']])
+    await q.edit_message_text(f"أرسل ID العنصر لحذفه من {context.user_data['sec']}:\n{lst}")
     return ADMIN_TITLE
 
 async def adm_del_id(update: Update, context):
-    sec = context.user_data[\'sec\']
+    sec = context.user_data['sec']
     try:
         idx = int(update.message.text)
     except:
         await update.message.reply_text("⚠️ id خاطئ.")
         return ADMIN_TITLE
     before = len(data[sec])
-    data[sec] = [x for x in data[sec] if x[\'id\'] != idx]
+    data[sec] = [x for x in data[sec] if x['id'] != idx]
     save()
     if len(data[sec]) < before:
         await update.message.reply_text("✅ تم الحذف.")
@@ -1014,13 +1014,13 @@ async def adm_up_start(update: Update, context):
 async def adm_up_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
-    await q.edit_message_text(f"✏️ أرسل الملف للقسم {context.user_data[\'sec\]}:")
+    context.user_data['sec'] = q.data.split("_", 1)[1]
+    await q.edit_message_text(f"✏️ أرسل الملف للقسم {context.user_data['sec']}:")
     return UPLOAD_FILE
 
 async def adm_receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    sec = context.user_data[\'sec\']
+    sec = context.user_data['sec']
     if msg.document:
         fid, name = msg.document.file_id, msg.document.file_name
     elif msg.video:
@@ -1032,10 +1032,10 @@ async def adm_receive_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         return await msg.reply_text("⛔ أرسل ملف PDF/صوت/فيديو/صورة.")
 
-    nid = max([x[\'id\'] for x in data[sec]] or [0]) + 1
+    nid = max([x['id'] for x in data[sec]] or [0]) + 1
     data[sec].append({"id": nid, "title": name, "content": fid})
     save()
-    await msg.reply_text(f"✅ تم حفظ الملف في {sec}:\n`{name}`\nfile_id=`{fid}`", parse_mode=\'Markdown\')
+    await msg.reply_text(f"✅ تم حفظ الملف في {sec}:\n`{name}`\nfile_id=`{fid}`", parse_mode='Markdown')
     return ConversationHandler.END
 
 # 5) Edit item
@@ -1050,10 +1050,10 @@ async def adm_edit_start(update: Update, context):
 async def adm_edit_sec(update: Update, context):
     q = update.callback_query
     await q.answer()
-    context.user_data[\'sec\'] = q.data.split("_", 1)[1]
-    lst = "\n".join(f"- {i[\'title\']} (id={i[\'id\']})" for i in data[context.user_data[\'sec\']])
-    await q.edit_message_text(f"اختر العنصر للتعديل من {context.user_data[\'sec\]}:\n{lst}", reply_markup=InlineKeyboardMarkup(
-        [[InlineKeyboardButton(item[\'title\'], callback_data=f"AEI_{item[\'id\']}")] for item in data[context.user_data[\'sec\']]] +
+    context.user_data['sec'] = q.data.split("_", 1)[1]
+    lst = "\n".join(f"- {i['title']} (id={i['id']})" for i in data[context.user_data['sec']])
+    await q.edit_message_text(f"اختر العنصر للتعديل من {context.user_data['sec']}:\n{lst}", reply_markup=InlineKeyboardMarkup(
+        [[InlineKeyboardButton(item['title'], callback_data=f"AEI_{item['id']}")] for item in data[context.user_data['sec']]] +
         [[InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]]
     ))
     return ADMIN_TITLE
@@ -1062,18 +1062,18 @@ async def adm_edit_item(update: Update, context):
     q = update.callback_query
     await q.answer()
     item_id = int(q.data.split("_", 1)[1])
-    sec = context.user_data[\'sec\']
-    item = next((x for x in data[sec] if x[\'id\'] == item_id), None)
+    sec = context.user_data['sec']
+    item = next((x for x in data[sec] if x['id'] == item_id), None)
     if not item:
         await q.edit_message_text("⚠️ العنصر غير موجود.")
         return ConversationHandler.END
 
-    context.user_data[\'editing_item\'] = item
-    context.user_data[\'editing_item_id\'] = item_id
+    context.user_data['editing_item'] = item
+    context.user_data['editing_item_id'] = item_id
 
     kb = [
-        [InlineKeyboardButton(f"تعديل العنوان: {item[\'title\']}", callback_data=f"AEC_TITLE_{item_id}")],
-        [InlineKeyboardButton(f"تعديل المحتوى: {item[\'content\']}", callback_data=f"AEC_CONT_{item_id}")],
+        [InlineKeyboardButton(f"تعديل العنوان: {item['title']}", callback_data=f"AEC_TITLE_{item_id}")],
+        [InlineKeyboardButton(f"تعديل المحتوى: {item['content']}", callback_data=f"AEC_CONT_{item_id}")],
         [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
     ]
     await q.edit_message_text(f"ماذا تريد أن تعدل في العنصر (ID: {item_id}) من القسم {sec}?", reply_markup=InlineKeyboardMarkup(kb))
@@ -1086,13 +1086,13 @@ async def adm_edit_cont_start(update: Update, context):
     return ADMIN_CONTENT
 
 async def adm_edit_cont(update: Update, context):
-    sec = context.user_data[\'sec\']
-    item_id = context.user_data[\'editing_item_id\']
+    sec = context.user_data['sec']
+    item_id = context.user_data['editing_item_id']
     new_content = update.message.text.strip()
 
     for item in data[sec]:
-        if item[\'id\'] == item_id:
-            item[\'content\'] = new_content
+        if item['id'] == item_id:
+            item['content'] = new_content
             break
     save()
     await update.message.reply_text(f"✅ تم تحديث محتوى العنصر (ID: {item_id}) في {sec}.")
@@ -1105,13 +1105,13 @@ async def adm_edit_title_start(update: Update, context):
     return ADMIN_CONTENT
 
 async def adm_edit_title(update: Update, context):
-    sec = context.user_data[\'sec\']
-    item_id = context.user_data[\'editing_item_id\']
+    sec = context.user_data['sec']
+    item_id = context.user_data['editing_item_id']
     new_title = update.message.text.strip()
 
     for item in data[sec]:
-        if item[\'id\'] == item_id:
-            item[\'title\'] = new_title
+        if item['id'] == item_id:
+            item['title'] = new_title
             break
     save()
     await update.message.reply_text(f"✅ تم تحديث عنوان العنصر (ID: {item_id}) في {sec}.")
@@ -1220,14 +1220,14 @@ conv_handler_edit = ConversationHandler(
 application.add_handler(conv_handler_edit)
 
 # Flask Routes for Web App (from web_app.py)
-@app.route(\'/\')
+@app.route('/')
 def index():
     # In a real scenario, you might serve a simple HTML page or redirect to bot info
     return "Hello from Flask! Your bot is running."
 
-@app.route(\'/api/sections\')
+@app.route('/api/sections')
 def get_sections():
-    data_loaded = data # Assuming \'data\' is loaded from main.py
+    data_loaded = data # Assuming 'data' is loaded from main.py
     sections = []
     
     section_info = {
@@ -1267,7 +1267,7 @@ def get_sections():
     
     return jsonify(sections)
 
-@app.route(\'/api/section/<section_id>\')
+@app.route('/api/section/<section_id>')
 def get_section(section_id):
     data_loaded = data
     items = data_loaded.get(section_id, [])
@@ -1278,17 +1278,17 @@ def get_section(section_id):
         "count": len(items)
     })
 
-@app.route(\'/api/item/<section_id>/<int:item_id>\')
+@app.route('/api/item/<section_id>/<int:item_id>')
 def get_item(section_id, item_id):
     data_loaded = data
     items = data_loaded.get(section_id, [])
-    item = next((x for x in items if x[\'id\'] == item_id), None)
+    item = next((x for x in items if x['id'] == item_id), None)
     
     if item:
         return jsonify(item)
     return jsonify({"error": "Item not found"}), 404
 
-@app.route(\'/api/stats\')
+@app.route('/api/stats')
 def get_stats():
     data_loaded = data
     
@@ -1304,9 +1304,9 @@ def get_stats():
     
     return jsonify(stats)
 
-@app.route(\'/api/search\')
+@app.route('/api/search')
 def search():
-    query = request.args.get(\'q\', \'\').lower()
+    query = request.args.get('q', '').lower()
     if not query:
         return jsonify([])
     
@@ -1315,7 +1315,7 @@ def search():
     
     for section_id, items in data_loaded.items():
         for item in items:
-            if query in item[\'title\'].lower() or query in str(item.get("content", "")).lower():
+            if query in item['title'].lower() or query in str(item.get("content", "")).lower():
                 results.append({
                     "section": section_id,
                     "item": item
@@ -1323,7 +1323,7 @@ def search():
     
     return jsonify(results)
 
-@app.route(\'/health\')
+@app.route('/health')
 def health():
     # This endpoint will be pinged by Render to keep the service alive
     return jsonify({
@@ -1344,14 +1344,14 @@ def run_bot():
 telegram_bot_thread = threading.Thread(target=run_bot)
 telegram_bot_thread.daemon = True # Allow main program to exit even if thread is running
 
-if __name__ == \'__main__\':
+if __name__ == '__main__':
     # Start the bot thread if not already started
     if not telegram_bot_thread.is_alive():
         telegram_bot_thread.start()
         logger.info("Telegram bot thread started.")
 
     # Run Flask app
-    port = int(os.environ.get(\'PORT\', 5000))
+    port = int(os.environ.get('PORT', 5000))
     logger.info(f"Flask app starting on port {port}")
-    app.run(host=\'0.0.0.0\', port=port)
+    app.run(host='0.0.0.0', port=port)
 
