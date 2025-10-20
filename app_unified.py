@@ -1426,6 +1426,11 @@ telegram_bot_thread = threading.Thread(target=run_bot_webhook_mode)
 telegram_bot_thread.daemon = True # Allow main program to exit even if thread is running
 
 if __name__ == '__main__':
+    # Initialize the Application before starting the bot thread
+    # This is crucial for webhook mode when not using run_polling()
+    application.initialize()
+    logger.info("Telegram bot Application initialized.")
+
     # Start the bot thread if not already started
     if not telegram_bot_thread.is_alive():
         telegram_bot_thread.start()
