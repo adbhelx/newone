@@ -17,8 +17,8 @@ import logging
 import json
 from datetime import datetime, time, timedelta
 from typing import Dict, List
-from gtts import gTTS
 import random
+from gtts import gTTS
 import openai # Required for AI chat feature
 
 # Configure logging for both Flask and Telegram Bot
@@ -37,7 +37,7 @@ if os.path.exists(DB):
 else:
     keys = [
         "HSK1","HSK2","HSK3","HSK4","HSK5","HSK6",
-        "Quran","Dictionary","Stories","GrammarLessons","GrammarReview",
+        "Quran","Dictionary","Stories","Gramnalessons","GrammarReview",
         "Dialogues","Flashcards","Quizzes","PictureDictionary","GrammarTerms","Proverbs",
         "Applications"
     ]
@@ -330,7 +330,7 @@ class AchievementSystem:
             self.user_data["total_points"] += achievement["points"]
             self.save_user_data()
     
-    def get_user_level(self) -> Dict:
+    def get_user_level(self) -> Dict: # Added self
         """Calculate user level based on points"""
         points = self.user_data["total_points"]
         
@@ -359,7 +359,7 @@ class AchievementSystem:
         
         return levels[0]
     
-    def get_achievement_summary(self) -> str:
+    def get_achievement_summary(self) -> str: # Added self
         """Get formatted achievement summary"""
         level_info = self.get_user_level()
         unlocked_count = len(self.user_data["unlocked_achievements"])
@@ -368,29 +368,29 @@ class AchievementSystem:
         summary = f"""
 🏆 **ملخص الإنجازات**
 
-📊 المستوى: {level_info['icon']} {level_info['name_ar']} (المستوى {level_info['level']})
-💎 النقاط: {level_info['points']}
-🎯 التقدم للمستوى التالي: {level_info['progress']:.1f}%
+📊 المستوى: {level_info["icon"]} {level_info["name_ar"]} (المستوى {level_info["level"]})
+💎 النقاط: {level_info["points"]}
+🎯 التقدم للمستوى التالي: {level_info["progress"]:.1f}%
 🏅 الإنجازات: {unlocked_count}/{total_count}
 
 📈 **الإحصائيات:**
-• دروس مكتملة: {self.user_data['stats']['lessons_completed']}
-• كلمات متعلمة: {self.user_data['stats']['words_learned']}
-• سلسلة الأيام: {self.user_data['stats']['streak_days']} 🔥
-• اختبارات كاملة: {self.user_data['stats']['perfect_quizzes']}
-• قصص مقروءة: {self.user_data['stats']['stories_read']}
-• ساعات الدراسة: {self.user_data['stats']['study_hours']:.1f}
+• دروس مكتملة: {self.user_data["stats"]["lessons_completed"]}
+• كلمات متعلمة: {self.user_data["stats"]["words_learned"]}
+• سلسلة الأيام: {self.user_data["stats"]["streak_days"]}
+• اختبارات كاملة: {self.user_data["stats"]["perfect_quizzes"]}
+• قصص مقروءة: {self.user_data["stats"]["stories_read"]}
+• ساعات الدراسة: {self.user_data["stats"]["study_hours"]:.1f}
 """
         return summary
     
-    def get_unlocked_achievements(self) -> List[Dict]:
+    def get_unlocked_achievements(self) -> List[Dict]: # Added self
         """Get list of unlocked achievements"""
         return [
             ACHIEVEMENTS[aid] 
             for aid in self.user_data["unlocked_achievements"]
         ]
     
-    def get_locked_achievements(self) -> List[Dict]:
+    def get_locked_achievements(self) -> List[Dict]: # Added self
         """Get list of locked achievements with progress"""
         locked = []
         for achievement_id, achievement in ACHIEVEMENTS.items():
@@ -410,6 +410,71 @@ class AchievementSystem:
                 locked.append(achievement_copy)
         
         return sorted(locked, key=lambda x: x["progress"], reverse=True)
+
+async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Display user achievements menu."""
+    query = update.callback_query
+    if query:
+        await query.answer()
+
+    user_id = update.effective_user.id
+    achievement_system = AchievementSystem(user_id)
+    
+    summary = achievement_system.get_achievement_summary()
+    
+    keyboard = [
+        [InlineKeyboardButton("🏅 الإنجازات المفتوحة", callback_data="ACH_UNLOCKED")],
+        [InlineKeyboardButton("🔒 الإنجازات المقفلة", callback_data="ACH_LOCKED")],
+        [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if query:
+        await query.edit_message_text(summary, parse_mode='Markdown', reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(summary, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def show_unlocked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show unlocked achievements."""
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = update.effective_user.id
+    achievement_system = AchievementSystem(user_id)
+    unlocked = achievement_system.get_unlocked_achievements()
+    
+    if not unlocked:
+        text = "لم تفتح أي إنجازات بعد."
+    else:
+        text = "🏅 **الإنجازات المفتوحة**:\n\n"
+        for ach in unlocked:
+            text += f"- {ach['icon']} **{ach['name']}**: {ach['description']} (+{ach['points']} نقطة)\n"
+            
+    keyboard = [[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def show_locked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show locked achievements."""
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = update.effective_user.id
+    achievement_system = AchievementSystem(user_id)
+    locked = achievement_system.get_locked_achievements()
+    
+    if not locked:
+        text = "🎉 لقد فتحت جميع الإنجازات! 🎉"
+    else:
+        text = "🔒 **الإنجازات المقفلة**:\n\n"
+        for ach in locked:
+            text += f"- {ach['icon']} **{ach['name']}**: {ach['description']} ({ach['current']}/{ach['target']})\n"
+            
+    keyboard = [[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
 
 def format_achievement_notification(achievement: Dict) -> str:
     """Format achievement unlock notification"""
@@ -488,6 +553,19 @@ def save_reminders(reminders):
     with open(REMINDERS_DB, "w", encoding="utf-8") as f:
         json.dump(reminders, f, ensure_ascii=False, indent=2)
 
+async def send_daily_reminder_message(context: ContextTypes.DEFAULT_TYPE):
+    job_data = context.job.data
+    user_id = job_data["user_id"]
+    chat_id = job_data["chat_id"]
+
+    message = (
+        """🔔 **تذكيرك اليومي لتعلم الصينية!**\n\n"
+        "حان وقت الدراسة! إليك كلمة اليوم:\n"
+        "**你好 (Nǐ hǎo) - مرحباً**\n\n"
+        "استمر في التقدم! 🚀"""
+    )
+    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
+
 async def start_reminders_setup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("⏰ 09:00 صباحاً", callback_data="set_reminder_0900")],
@@ -558,19 +636,6 @@ async def set_daily_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"✅ تم تعيين تذكير يومي في الساعة {hour:02d}:{minute:02d}.\n"
         "سأرسل لك كلمة اليوم أو تحديًا بسيطًا."
     )
-
-async def send_daily_reminder_message(context: ContextTypes.DEFAULT_TYPE):
-    job_data = context.job.data
-    user_id = job_data["user_id"]
-    chat_id = job_data["chat_id"]
-
-    message = (
-        """🔔 **تذكيرك اليومي لتعلم الصينية!**\n\n"
-        "حان وقت الدراسة! إليك كلمة اليوم:\n"
-        "**你好 (Nǐ hǎo) - مرحباً**\n\n"
-        "استمر في التقدم! 🚀"""
-    )
-    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
 
 async def re_schedule_all_reminders(application):
     reminders = load_reminders()
@@ -709,9 +774,10 @@ def get_all_user_ids() -> List[int]:
 def load_user_points(user_id: int) -> int:
     """Load total points for a specific user."""
     try:
+        # Load achievement data for the user and return total_points
         with open(f"{USER_ACHIEVEMENTS_PREFIX}{user_id}.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("total_points", 0)
+            user_ach_data = json.load(f)
+            return user_ach_data.get("total_points", 0)
     except FileNotFoundError:
         return 0
     except json.JSONDecodeError:
@@ -1127,24 +1193,28 @@ application = ApplicationBuilder().token(TOKEN).build()
 # Add handlers
 application.add_handler(CommandHandler("start", start))
 application.add_handler(CallbackQueryHandler(main_h, pattern="^(MENU_|BACK|SKIP_|SEC_)"))
-application.add_handler(CallbackQueryHandler(show_achievements, pattern="^MENU_ACHIEVEMENTS$"))
-application.add_handler(CallbackQueryHandler(view_i, pattern="^VIEW_"))
 
 # AI Chat handlers
 application.add_handler(CallbackQueryHandler(ai_chat_start, pattern="^MENU_AI_CHAT$"))
-application.add_handler(CallbackQueryHandler(ai_mode_select, pattern="^AI_MODE_"))
-application.add_handler(CallbackQueryHandler(ai_chat_stop, pattern="^AI_STOP$"))
-application.add_handler(CallbackQueryHandler(ai_chat_stats, pattern="^AI_STATS$"))
+application.add_handler(CallbackQueryHandler(ai_mode_select, pattern="^ai_mode_")) # Corrected pattern
+application.add_handler(CommandHandler("stop_ai", ai_chat_stop))
+application.add_handler(CommandHandler("ai_stats", ai_chat_stats))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_message))
+
+# Achievements handlers
+application.add_handler(CallbackQueryHandler(show_achievements, pattern="^MENU_ACHIEVEMENTS$"))
+application.add_handler(CallbackQueryHandler(show_unlocked_achievements, pattern="^ACH_UNLOCKED$"))
+application.add_handler(CallbackQueryHandler(show_locked_achievements, pattern="^ACH_LOCKED$"))
+application.add_handler(CallbackQueryHandler(show_achievements, pattern="^MENU_ACHIEVEMENTS")) # Added for BACK from achievements
 
 # Text-to-Speech handlers
 application.add_handler(CallbackQueryHandler(text_to_speech_start, pattern="^MENU_TTS$"))
-application.add_handler(CallbackQueryHandler(text_to_speech_stop, pattern="^TTS_STOP$"))
+application.add_handler(CommandHandler("stop_tts", text_to_speech_stop))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_to_speech_message))
 
 # Daily Reminders handlers
 application.add_handler(CallbackQueryHandler(start_reminders_setup, pattern="^MENU_REMINDERS$"))
-application.add_handler(CommandHandler("setreminder", set_daily_reminder))
+application.add_handler(CallbackQueryHandler(set_daily_reminder, pattern="^set_reminder_|^cancel_reminder$"))
 
 # Word Matching Game handlers
 word_matching_conv_handler = ConversationHandler(
@@ -1161,6 +1231,8 @@ application.add_handler(word_matching_conv_handler)
 
 # Leaderboard handler
 application.add_handler(CallbackQueryHandler(show_leaderboard, pattern="^MENU_LEADERBOARD$"))
+
+application.add_handler(CallbackQueryHandler(view_i, pattern="^VIEW_"))
 
 # Admin Conversation Handlers
 conv_handler_add = ConversationHandler(
