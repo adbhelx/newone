@@ -22,8 +22,7 @@ from datetime import datetime
 from main import (
     start, main_h, show_achievements, view_i, 
     adm_add_start, adm_add_sec, adm_add_title, adm_add_cont, 
-    adm_view_start, adm_view_sec, adm_del_start, adm_del_sec, 
-    adm_up_start, adm_up_sec, adm_up_file, adm_up_finish, 
+    adm_view_start, adm_view_sec, adm_del_start, adm_del_sec,     adm_up_start, adm_up_sec, adm_receive_file, adm_up_finish, \
     adm_edit_start, adm_edit_sec, adm_edit_item, adm_edit_cont_start, 
     adm_edit_cont, adm_edit_title_start, adm_edit_title, 
     ai_chat_start, ai_mode_select, ai_chat_message, ai_chat_stop, ai_chat_stats, 
@@ -110,7 +109,7 @@ conv_handler_up = ConversationHandler(
     entry_points=[CallbackQueryHandler(adm_up_start, pattern="^UP_")],
     states={
         UPLOAD_FILE: [
-            MessageHandler(filters.Document.ALL, adm_up_file),
+            MessageHandler(filters.Document.ALL, adm_receive_file),
             CallbackQueryHandler(adm_up_finish, pattern="^UP_FINISH_")
         ]
     },
