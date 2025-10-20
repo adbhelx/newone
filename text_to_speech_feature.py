@@ -9,11 +9,11 @@ async def text_to_speech_start(update: Update, context: ContextTypes.DEFAULT_TYP
         [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
     ]
     await update.message.reply_text(
-        "🔊 **ميزة النطق الصوتي!**
-"
-        "أرسل لي أي نص صيني وسأقوم بنطقه لك.
-"
-        "استخدم /stop_tts لإنهاء هذه الميزة.",
+        # تم تعديل هذا الجزء ليستخدم الاقتباس الثلاثي
+        """🔊 **ميزة النطق الصوتي!**
+
+أرسل لي أي نص صيني وسأقوم بنطقه لك.
+استخدم /stop_tts لإنهاء هذه الميزة.""",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode='Markdown'
     )
