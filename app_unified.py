@@ -22,8 +22,10 @@ from datetime import datetime
 from main import (
     start, main_h, show_achievements, view_i, 
     adm_add_start, adm_add_sec, adm_add_title, adm_add_cont, 
-    adm_view_start, adm_view_sec, adm_del_start, adm_del_sec, adm_del_id,
-    adm_up_start, adm_up_sec, adm_receive_file,
+    adm_view_start, adm_view_sec, adm_del_start, adm_del_sec, adm_del_id, 
+    adm_up_start, adm_up_sec, adm_receive_file, 
+    adm_edit_start, adm_edit_sec, adm_edit_item, adm_edit_cont_start, 
+    adm_edit_cont, adm_edit_title_start, adm_edit_title, 
     ai_chat_start, ai_mode_select, ai_chat_message, ai_chat_stop, ai_chat_stats, 
     text_to_speech_start, text_to_speech_message, text_to_speech_stop, 
     start_reminders_setup, set_daily_reminder, re_schedule_all_reminders, 
@@ -115,6 +117,21 @@ conv_handler_up = ConversationHandler(
 )
 application.add_handler(conv_handler_up)
 
+conv_handler_edit = ConversationHandler(
+    entry_points=[CallbackQueryHandler(adm_edit_start, pattern="^ADM_EDIT$")],
+    states={
+        ADMIN_SECTION: [CallbackQueryHandler(adm_edit_sec, pattern="^AES_")],
+        ADMIN_TITLE: [CallbackQueryHandler(adm_edit_item, pattern="^AEI_")],
+        ADMIN_CONTENT: [
+            CallbackQueryHandler(adm_edit_cont_start, pattern="^AEC_CONT_"),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, adm_edit_cont),
+            CallbackQueryHandler(adm_edit_title_start, pattern="^AEC_TITLE_"),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, adm_edit_title),
+        ]
+    },
+    fallbacks=[CallbackQueryHandler(main_h, pattern="^BACK$")]
+)
+application.add_handler(conv_handler_edit)
 
 # Flask Routes for Web App
 @app.route('/')
