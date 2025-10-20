@@ -1,17 +1,20 @@
+
 """
 ميزة المحادثة الذكية بالذكاء الاصطناعي
 AI Chat Feature - أولوية عالية للتنفيذ
 """
 
 import os
-import openai
+from openai import OpenAI
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 # Initialize Groq client (compatible with OpenAI API)
 # Groq is FREE and FAST! 🚀
-openai.api_key = os.environ.get("GROQ_API_KEY", "")
-openai.api_base = "https://api.groq.com/openai/v1"
+client = OpenAI(
+    api_key=os.environ.get("GROQ_API_KEY", ""),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 # System prompts for different modes
 SYSTEM_PROMPTS = {
@@ -111,7 +114,7 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         messages.append({"role": "user", "content": user_message})
         
         # Call Groq API (FREE and FAST!)
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",  # Groq's free model
             messages=messages,
             max_tokens=500,
@@ -163,7 +166,7 @@ async def ai_chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     mode_names = {
         "teacher": "🎓 وضع المعلم",
-        "conversation": "💬 وضع المحادثة",
+        "conversation": "💬 وضع المحادثة", 
         "translator": "🔤 وضع المترجم"
     }
     
@@ -174,3 +177,31 @@ async def ai_chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"سجل المحادثة: {len(history)} رسالة\n\n"
         "استخدم /stop_ai لإنهاء المحادثة."
     )
+
+# Example usage in bot.py:
+"""
+from ai_chat_feature import (
+    ai_chat_start, ai_mode_select, ai_chat_message, 
+    ai_chat_stop, ai_chat_stats
+)
+
+# Add handlers
+app.add_handler(CommandHandler("ai_chat", ai_chat_start))
+app.add_handler(CommandHandler("stop_ai", ai_chat_stop))
+app.add_handler(CommandHandler("ai_stats", ai_chat_stats))
+app.add_handler(CallbackQueryHandler(ai_mode_select, pattern=r"^ai_mode_"))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_message))
+"""
+
+# Advanced features to add:
+"""
+1. Voice support: تحويل الصوت إلى نص والعكس
+2. Image recognition: التعرف على الأشياء في الصور وتسميتها بالصينية
+3. Grammar correction: تصحيح نحوي متقدم مع شرح
+4. Vocabulary extraction: استخراج الكلمات الجديدة من المحادثة
+5. Progress tracking: تتبع تحسن المستخدم عبر الزمن
+6. Personalization: تخصيص أسلوب التعليم حسب المستخدم
+7. Context awareness: فهم السياق من المحادثات السابقة
+8. Multi-modal: دعم النص والصوت والصورة معاً
+"""
+
