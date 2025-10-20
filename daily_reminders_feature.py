@@ -1,4 +1,3 @@
-
 import json
 import os
 from datetime import time
@@ -30,7 +29,7 @@ async def start_reminders_setup(update: Update, context: ContextTypes.DEFAULT_TY
         "اختر الوقت الذي تفضل أن أذكرك فيه بالدراسة:\n"
         "(يمكنك إلغاء التذكير في أي وقت)",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=\'Markdown\'
+        parse_mode='Markdown'
     )
 
 async def set_daily_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,7 +100,7 @@ async def send_daily_reminder_message(context: ContextTypes.DEFAULT_TYPE):
         "**你好 (Nǐ hǎo) - مرحباً**\n\n"
         "استمر في التقدم! 🚀"
     )
-    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode=\'Markdown\')
+    await context.bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
 
 # Function to re-schedule reminders on bot restart
 async def re_schedule_all_reminders(application):
@@ -143,4 +142,3 @@ app.add_handler(CallbackQueryHandler(set_daily_reminder, pattern=r"^set_reminder
 # Call this after app.run_polling() or at bot startup
 # application.post_init(re_schedule_all_reminders)
 """
-
