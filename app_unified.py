@@ -411,82 +411,17 @@ class AchievementSystem:
         
         return sorted(locked, key=lambda x: x["progress"], reverse=True)
 
-async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Display user achievements menu."""
-    query = update.callback_query
-    if query:
-        await query.answer()
-
-    user_id = update.effective_user.id
-    achievement_system = AchievementSystem(user_id)
-    
-    summary = achievement_system.get_achievement_summary()
-    
-    keyboard = [
-        [InlineKeyboardButton("🏅 الإنجازات المفتوحة", callback_data="ACH_UNLOCKED")],
-        [InlineKeyboardButton("🔒 الإنجازات المقفلة", callback_data="ACH_LOCKED")],
-        [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    if query:
-        await query.edit_message_text(summary, parse_mode='Markdown', reply_markup=reply_markup)
-    else:
-        await update.message.reply_text(summary, parse_mode='Markdown', reply_markup=reply_markup)
-
-async def show_unlocked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show unlocked achievements."""
-    query = update.callback_query
-    await query.answer()
-    
-    user_id = update.effective_user.id
-    achievement_system = AchievementSystem(user_id)
-    unlocked = achievement_system.get_unlocked_achievements()
-    
-    if not unlocked:
-        text = "لم تفتح أي إنجازات بعد."
-    else:
-        text = "🏅 **الإنجازات المفتوحة**:\n\n"
-        for ach in unlocked:
-            text += f"- {ach['icon']} **{ach['name']}**: {ach['description']} (+{ach['points']} نقطة)\n"
-            
-    keyboard = [[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
-
-async def show_locked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show locked achievements."""
-    query = update.callback_query
-    await query.answer()
-    
-    user_id = update.effective_user.id
-    achievement_system = AchievementSystem(user_id)
-    locked = achievement_system.get_locked_achievements()
-    
-    if not locked:
-        text = "🎉 لقد فتحت جميع الإنجازات! 🎉"
-    else:
-        text = "🔒 **الإنجازات المقفلة**:\n\n"
-        for ach in locked:
-            text += f"- {ach['icon']} **{ach['name']}**: {ach['description']} ({ach['current']}/{ach['target']})\n"
-            
-    keyboard = [[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
-
 def format_achievement_notification(achievement: Dict) -> str:
     """Format achievement unlock notification"""
     return f"""
 🎉 **إنجاز جديد مفتوح!**
 
-{achievement['icon']} **{achievement['name']}**
-{achievement['name_en']}
+{achievement["icon"]} **{achievement["name"]}**
+{achievement["name_en"]}
 
-{achievement['description']}
+{achievement["description"]}
 
-💎 +{achievement['points']} نقطة
+💎 +{achievement["points"]} نقطة
 """
 
 
@@ -900,7 +835,7 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb, row = [], []
         for i, (t, c) in enumerate(apps, 1):
             row.append(InlineKeyboardButton(t, callback_data=c))
-            if i % 2 == 0:
+            if len(row) == 2:
                 kb.append(row)
                 row = []
         if row:
@@ -940,6 +875,10 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Daily Reminders
     if d == "MENU_REMINDERS":
         return await start_reminders_setup(update, context)
+
+    # Word Game
+    if d == "MENU_WORD_GAME":
+        return await start_word_matching_game(update, context)
 
     # Leaderboard
     if d == "MENU_LEADERBOARD":
@@ -1297,6 +1236,12 @@ def index():
     # In a real scenario, you might serve a simple HTML page or redirect to bot info
     return "Hello from Flask! Your bot is running."
 
+@app.route('/webhook', methods=['POST'])
+async def telegram_webhook():
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return 'ok'
+
 @app.route('/api/sections')
 def get_sections():
     data_loaded = data # Assuming 'data' is loaded from main.py
@@ -1409,8 +1354,9 @@ def run_bot():
     logger.info("Starting Telegram bot polling...")
     # Re-schedule reminders here, after application is built and before polling starts
     asyncio.run(re_schedule_all_reminders(application))
-    application.run_polling(drop_pending_updates=True)
-    logger.info("Telegram bot polling stopped.")
+    # We are using webhook, so no polling here.
+    # application.run_polling(drop_pending_updates=True)
+    logger.info("Telegram bot polling stopped.") # This line might not be reached if using webhook
 
 # Start the Telegram bot in a separate thread
 telegram_bot_thread = threading.Thread(target=run_bot)
