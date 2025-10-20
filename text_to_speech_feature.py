@@ -1,4 +1,3 @@
-
 import os
 from gtts import gTTS
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -10,11 +9,13 @@ async def text_to_speech_start(update: Update, context: ContextTypes.DEFAULT_TYP
         [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
     ]
     await update.message.reply_text(
-        "🔊 **ميزة النطق الصوتي!**\n\n"
-        "أرسل لي أي نص صيني وسأقوم بنطقه لك.\n"
+        "🔊 **ميزة النطق الصوتي!**
+"
+        "أرسل لي أي نص صيني وسأقوم بنطقه لك.
+"
         "استخدم /stop_tts لإنهاء هذه الميزة.",
         reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode=\'Markdown\'
+        parse_mode='Markdown'
     )
     context.user_data["tts_active"] = True
 
@@ -61,4 +62,3 @@ app.add_handler(CommandHandler("tts", text_to_speech_start))
 app.add_handler(CommandHandler("stop_tts", text_to_speech_stop))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_to_speech_message))
 """
-
