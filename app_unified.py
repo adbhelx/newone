@@ -26,7 +26,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 # --- Content from config.py ---
-TOKEN = "8085016643:AAEHAO1BlQzhdo39N7MSkx3NEZK3P0d5M58"  # ضع هنا التوكن الخاص بك
+TOKEN = "8085016643:AAEHAO1BlQzhdo39N7MSkx0NEZK3P0d5M58"  # ضع هنا التوكن الخاص بك
 ADMIN_USER_IDS = [953696547, 7942066919]  # ضع هنا معرفات المستخدمين المشرفين
 
 # Data file (from main.py)
@@ -62,24 +62,11 @@ ADMIN_SECTION, ADMIN_TITLE, ADMIN_CONTENT, UPLOAD_FILE = range(4)
 AI Chat Feature - أولوية عالية للتنفيذ
 """
 SYSTEM_PROMPTS = {
-    "teacher": """أنت معلم لغة صينية محترف وصبور. 
-    - ساعد المتعلم على تحسين لغته الصينية
-    - صحح الأخطاء بلطف مع شرح السبب
-    - قدم أمثلة عملية
-    - استخدم العربية للشرح والصينية للأمثلة
-    - كن مشجعاً ومحفزاً""",
+    "teacher": """أنت معلم لغة صينية محترف وصبور. \n    - ساعد المتعلم على تحسين لغته الصينية\n    - صحح الأخطاء بلطف مع شرح السبب\n    - قدم أمثلة عملية\n    - استخدم العربية للشرح والصينية للأمثلة\n    - كن مشجعاً ومحفزاً""",
     
-    "conversation": """أنت صديق صيني يتحدث الصينية المبسطة.
-    - تحدث بالصينية بشكل طبيعي
-    - استخدم جمل بسيطة ومفهومة
-    - أضف الترجمة العربية بين قوسين عند الحاجة
-    - تحدث عن مواضيع يومية ممتعة""",
+    "conversation": """أنت صديق صيني يتحدث الصينية المبسطة.\n    - تحدث بالصينية بشكل طبيعي\n    - استخدم جمل بسيطة ومفهومة\n    - أضف الترجمة العربية بين قوسين عند الحاجة\n    - تحدث عن مواضيع يومية ممتعة""",
     
-    "translator": """أنت مترجم محترف بين العربية والصينية.
-    - ترجم بدقة وبشكل طبيعي
-    - قدم ترجمات بديلة إن وجدت
-    - اشرح السياق الثقافي عند الحاجة
-    - قدم النطق بالبينيين (Pinyin)"""
+    "translator": """أنت مترجم محترف بين العربية والصينية.\n    - ترجم بدقة وبشكل طبيعي\n    - قدم ترجمات بديلة إن وجدت\n    - اشرح السياق الثقافي عند الحاجة\n    - قدم النطق بالبينيين (Pinyin)"""
 }
 
 async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -330,7 +317,7 @@ class AchievementSystem:
             self.user_data["total_points"] += achievement["points"]
             self.save_user_data()
     
-    def get_user_level(self) -> Dict: # Added self
+    def get_user_level(self) -> Dict:
         """Calculate user level based on points"""
         points = self.user_data["total_points"]
         
@@ -359,7 +346,7 @@ class AchievementSystem:
         
         return levels[0]
     
-    def get_achievement_summary(self) -> str: # Added self
+    def get_achievement_summary(self) -> str:
         """Get formatted achievement summary"""
         level_info = self.get_user_level()
         unlocked_count = len(self.user_data["unlocked_achievements"])
@@ -383,14 +370,14 @@ class AchievementSystem:
 """
         return summary
     
-    def get_unlocked_achievements(self) -> List[Dict]: # Added self
+    def get_unlocked_achievements(self) -> List[Dict]:
         """Get list of unlocked achievements"""
         return [
             ACHIEVEMENTS[aid] 
             for aid in self.user_data["unlocked_achievements"]
         ]
     
-    def get_locked_achievements(self) -> List[Dict]: # Added self
+    def get_locked_achievements(self) -> List[Dict]:
         """Get list of locked achievements with progress"""
         locked = []
         for achievement_id, achievement in ACHIEVEMENTS.items():
@@ -423,6 +410,72 @@ def format_achievement_notification(achievement: Dict) -> str:
 
 💎 +{achievement["points"]} نقطة
 """
+
+# --- Achievement Handlers (moved outside class for direct use) ---
+async def show_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    if query:
+        await query.answer()
+        user_id = query.from_user.id
+    else:
+        user_id = update.effective_user.id
+
+    ach_system = AchievementSystem(user_id)
+    summary = ach_system.get_achievement_summary()
+
+    keyboard = [
+        [InlineKeyboardButton("✅ إنجازات مفتوحة", callback_data="ACH_UNLOCKED")],
+        [InlineKeyboardButton("🔒 إنجازات مغلقة", callback_data="ACH_LOCKED")],
+        [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if query:
+        await query.edit_message_text(summary, reply_markup=reply_markup, parse_mode='Markdown')
+    else:
+        await update.message.reply_text(summary, reply_markup=reply_markup, parse_mode='Markdown')
+
+async def show_unlocked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+
+    ach_system = AchievementSystem(user_id)
+    unlocked = ach_system.get_unlocked_achievements()
+
+    if not unlocked:
+        await query.edit_message_text("لا توجد إنجازات مفتوحة بعد.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]))
+        return
+
+    text = "✅ **إنجازاتك المفتوحة:**\n\n"
+    for ach in unlocked:
+        text += f"{ach["icon"]} **{ach["name"]}** - {ach["description"]}\n"
+
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]), parse_mode='Markdown')
+
+async def show_locked_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+
+    ach_system = AchievementSystem(user_id)
+    locked = ach_system.get_locked_achievements()
+
+    if not locked:
+        await query.edit_message_text("لقد فتحت جميع الإنجازات! رائع!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]))
+        return
+
+    text = "🔒 **إنجازاتك المغلقة:**\n\n"
+    for ach in locked:
+        progress_bar = "⬜" * (ach["progress"] // 10) + "⬛" * (10 - (ach["progress"] // 10))
+        text += f"{ach["icon"]} **{ach["name"]}**\n"
+        text += f"  {ach["description"]}\n"
+        if isinstance(ach["current"], list):
+            text += f"  التقدم: {len(ach["current"])} / {ach["target"]}\n\n"
+        else:
+            text += f"  التقدم: {ach["current"]}/{ach["target"]} ({ach["progress"]:.1f}%)\n\n"
+
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ رجوع", callback_data="MENU_ACHIEVEMENTS")]]), parse_mode='Markdown')
 
 
 # --- Content from text_to_speech_feature.py ---
@@ -1068,7 +1121,7 @@ async def adm_edit_item(update: Update, context):
     await q.answer()
     item_id = int(q.data.split("_", 1)[1])
     sec = context.user_data['sec']
-    item = next((x for x in data[sec] if x['id'] == item_id), None)
+    item = next((x for x in data.get(sec, []) if x['id'] == item_id), None)
     if not item:
         await q.edit_message_text("⚠️ العنصر غير موجود.")
         return ConversationHandler.END
@@ -1135,12 +1188,12 @@ application.add_handler(CallbackQueryHandler(main_h, pattern="^(MENU_|BACK|SKIP_
 
 # AI Chat handlers
 application.add_handler(CallbackQueryHandler(ai_chat_start, pattern="^MENU_AI_CHAT$"))
-application.add_handler(CallbackQueryHandler(ai_mode_select, pattern="^ai_mode_")) # Corrected pattern
+application.add_handler(CallbackQueryHandler(ai_mode_select, pattern="^ai_mode_"))
 application.add_handler(CommandHandler("stop_ai", ai_chat_stop))
 application.add_handler(CommandHandler("ai_stats", ai_chat_stats))
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_message))
 
-# Achievements handlers
+# Achievements handlers (ensure these are defined before this section)
 application.add_handler(CallbackQueryHandler(show_achievements, pattern="^MENU_ACHIEVEMENTS$"))
 application.add_handler(CallbackQueryHandler(show_unlocked_achievements, pattern="^ACH_UNLOCKED$"))
 application.add_handler(CallbackQueryHandler(show_locked_achievements, pattern="^ACH_LOCKED$"))
@@ -1164,7 +1217,7 @@ word_matching_conv_handler = ConversationHandler(
             CallbackQueryHandler(end_word_matching_game, pattern="^game_end$")
         ]
     },
-    fallbacks=[CommandHandler("cancel", end_word_matching_game)]
+    fallbacks=[CallbackQueryHandler(main_h, pattern="^BACK$")]
 )
 application.add_handler(word_matching_conv_handler)
 
@@ -1231,6 +1284,8 @@ conv_handler_edit = ConversationHandler(
 application.add_handler(conv_handler_edit)
 
 # Flask Routes for Web App (from web_app.py)
+app = Flask(__name__)
+
 @app.route('/')
 def index():
     # In a real scenario, you might serve a simple HTML page or redirect to bot info
@@ -1239,7 +1294,8 @@ def index():
 @app.route('/webhook', methods=['POST'])
 async def telegram_webhook():
     update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
+    # Run the update processing in a separate task to avoid blocking the Flask thread
+    asyncio.create_task(application.process_update(update))
     return 'ok'
 
 @app.route('/api/sections')
@@ -1350,16 +1406,23 @@ def health():
     })
 
 # Function to run the Telegram bot
-def run_bot():
-    logger.info("Starting Telegram bot polling...")
-    # Re-schedule reminders here, after application is built and before polling starts
+def run_bot_async_loop():
+    asyncio.run(application.run_polling())
+
+def run_bot_webhook_mode():
+    logger.info("Starting Telegram bot in webhook mode...")
+    # Set webhook here. This is typically done once, not on every startup.
+    # However, if it needs to be set on every startup for Render, ensure it's idempotent.
+    # For Render, the webhook URL is usually the service's public URL + /webhook
+    # The application.run_webhook() method is used when running with Flask/Gunicorn
+    # The actual webhook handling is done in telegram_webhook Flask route.
+    # We only need to ensure the reminders are rescheduled.
     asyncio.run(re_schedule_all_reminders(application))
-    # We are using webhook, so no polling here.
-    # application.run_polling(drop_pending_updates=True)
-    logger.info("Telegram bot polling stopped.") # This line might not be reached if using webhook
+    logger.info("Telegram bot webhook mode initialized.")
 
 # Start the Telegram bot in a separate thread
-telegram_bot_thread = threading.Thread(target=run_bot)
+# This thread will manage the bot's background tasks (like job_queue and webhook setup)
+telegram_bot_thread = threading.Thread(target=run_bot_webhook_mode)
 telegram_bot_thread.daemon = True # Allow main program to exit even if thread is running
 
 if __name__ == '__main__':
