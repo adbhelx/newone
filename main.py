@@ -67,17 +67,17 @@ def is_admin(user_id):
 # Build main keyboard
 def build_main_menu():
     items = [
-        ("📚 HSK", "MENU_HSK"),
-        ("🕌 القرآن", "MENU_Quran"),
-        ("🗂️ القاموس", "MENU_Dictionary"),
-        ("📖 القصص", "MENU_Stories"),
-        ("🔤 قواعد", "MENU_GrammarLessons"),
-        ("📑 مراجعة", "MENU_GrammarReview"),
-        ("💬 محادثات", "MENU_Dialogues"),
-        ("🃏 Flashcards", "MENU_Flashcards"),
-        ("❓ كويزات", "MENU_Quizzes"),
-        ("📷 معجم صور", "MENU_PictureDictionary"),
-        ("📱 التطبيقات", "MENU_Apps"),
+        ("📚 التعليم المخصص", "MENU_CUSTOM_EDU"),
+        ("🕌 القرآن", "SKIP_Quran"),
+        ("🗂️ القاموس", "SKIP_Dictionary"),
+        ("📖 القصص", "SKIP_Stories"),
+        ("🔤 قواعد", "SKIP_GrammarLessons"),
+        ("📑 مراجعة", "SKIP_GrammarReview"),
+        ("💬 محادثات", "SKIP_Dialogues"),
+        ("🃏 Flashcards", "SKIP_Flashcards"),
+        ("❓ كويزات", "SKIP_Quizzes"),
+        ("📷 معجم صور", "SKIP_PictureDictionary"),
+        ("🧑‍🏫 مرشد أكاديمي", "MENU_ACADEMIC_ADVISOR"),
         ("🤖 AI Chat", "MENU_AI_CHAT"),
         ("🏆 الإنجازات", "MENU_ACHIEVEMENTS"),
         ("🔊 نطق صوتي", "MENU_TTS"),
@@ -132,18 +132,27 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb.append([InlineKeyboardButton("◀️ رجوع", callback_data="BACK")])
         return await q.edit_message_text("قسم التطبيقات:", reply_markup=InlineKeyboardMarkup(kb))
 
-    # HSK levels menu
-    if d == "MENU_HSK":
-        kb, row = [], []
-        for i in range(1, 7):
-            row.append(InlineKeyboardButton(f"HSK{i}", callback_data=f"SEC_HSK{i}"))
-            if len(row) == 3:
-                kb.append(row)
-                row = []
-        if row:
-            kb.append(row)
-        kb.append([InlineKeyboardButton("◀️ رجوع", callback_data="BACK")])
-        return await q.edit_message_text("اختر مستوى HSK:", reply_markup=InlineKeyboardMarkup(kb))
+	    # Custom Education Menu
+	    if d == "MENU_CUSTOM_EDU":
+	        kb = [
+	            [InlineKeyboardButton("📚 مناهج STEM", callback_data="SKIP_STEM")],
+	            [InlineKeyboardButton("💡 مهارات التفكير النقدي", callback_data="SKIP_CRITICAL_THINKING")],
+	            [InlineKeyboardButton("📝 اختبارات القدرات والتحصيلي", callback_data="SKIP_TESTS")],
+	            [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
+	        ]
+	        return await q.edit_message_text("اختر قسم التعليم المخصص:", reply_markup=InlineKeyboardMarkup(kb))
+	
+	    # Academic Advisor shortcut
+	    if d == "MENU_ACADEMIC_ADVISOR":
+	        # Note: This will trigger the AI Chat start and select the mode automatically
+	        context.user_data["ai_mode"] = "academic_advisor"
+	        context.user_data["ai_history"] = []
+	        await q.edit_message_text(
+	            "✅ تم تفعيل وضع المرشد الأكاديمي.\n\n"
+	            "اسأل عن التخصصات، اختبارات القدرات، أو أي نصيحة دراسية!\n"
+	            "استخدم /stop_ai لإنهاء المحادثة."
+	        )
+	        return
 
     # Back to main
     if d == "BACK":

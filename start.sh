@@ -1,8 +1,4 @@
 #!/bin/bash
-
-# Start the enhanced bot with AI features in background
-python bot_enhanced.py &
-
-# Start the web app
-gunicorn web_app:app --bind 0.0.0.0:$PORT
-
+# The Procfile handles the gunicorn web server which serves the webhook and health check
+# The telegram bot is integrated into the Flask app (app_unified.py)
+exec gunicorn app_unified:app --bind 0.0.0.0:"$PORT" --timeout 120

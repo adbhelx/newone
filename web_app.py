@@ -132,7 +132,7 @@ def search():
 
 @app.route('/health')
 def health():
-    """Health check endpoint"""
+    """Health check endpoint to keep the bot alive"""
     return jsonify({
         "status": "healthy",
         "timestamp": datetime.now().isoformat()

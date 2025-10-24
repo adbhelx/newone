@@ -66,7 +66,8 @@ SYSTEM_PROMPTS = {
     
     "conversation": """أنت صديق صيني يتحدث الصينية المبسطة.\n    - تحدث بالصينية بشكل طبيعي\n    - استخدم جمل بسيطة ومفهومة\n    - أضف الترجمة العربية بين قوسين عند الحاجة\n    - تحدث عن مواضيع يومية ممتعة""",
     
-    "translator": """أنت مترجم محترف بين العربية والصينية.\n    - ترجم بدقة وبشكل طبيعي\n    - قدم ترجمات بديلة إن وجدت\n    - اشرح السياق الثقافي عند الحاجة\n    - قدم النطق بالبينيين (Pinyin)"""
+    "translator": """أنت مترجم محترف بين العربية والصينية.\n    - ترجم بدقة وبشكل طبيعي\n    - قدم ترجمات بديلة إن وجدت\n    - اشرح السياق الثقافي عند الحاجة\n    - قدم النطق بالبينيين (Pinyin)""",
+    "academic_advisor": """أنت مستشار أكاديمي خبير في نظام التعليم السعودي (الابتدائي، المتوسط، الثانوي، الجامعي). مهمتك هي تقديم إجابات دقيقة ومفصلة ونصائح تحفيزية للطلاب حول مساراتهم التعليمية، وأفضل طرق الاستعداد لاختبارات القدرات والتحصيلي، وكيفية اختيار التخصصات الجامعية بما يتوافق مع رؤية 2030. استخدم لغة عربية فصحى ومحفزة."""
 }
 
 async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -78,6 +79,9 @@ async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("🔤 مترجم", callback_data="ai_mode_translator"),
+            InlineKeyboardButton("🧑‍🏫 مرشد أكاديمي", callback_data="ai_mode_academic_advisor")
+        ],
+        [
             InlineKeyboardButton("❌ إلغاء", callback_data="ai_cancel")
         ]
     ]
@@ -110,7 +114,8 @@ async def ai_mode_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mode_names = {
         "teacher": "🎓 وضع المعلم",
         "conversation": "💬 وضع المحادثة", 
-        "translator": "🔤 وضع المترجم"
+        "translator": "🔤 وضع المترجم",
+        "academic_advisor": "🧑‍🏫 وضع المرشد الأكاديمي"
     }
     
     await query.edit_message_text(
@@ -144,6 +149,12 @@ async def ai_chat_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Add current message
         messages.append({"role": "user", "content": user_message})
         
+        # Update academic advisor usage count
+        if mode == "academic_advisor":
+            user_id = update.message.from_user.id
+            achievement_system = AchievementSystem(user_id)
+            achievement_system.increment_stat("academic_advisor_uses")
+            
         # Call Groq API (compatible with OpenAI API)
         openai.api_key = os.environ.get("GROQ_API_KEY", "") # Ensure GROQ_API_KEY is set in Render environment variables
         openai.api_base = "https://api.groq.com/openai/v1"
@@ -227,8 +238,10 @@ ACHIEVEMENTS = {
     "month_warrior": {"id": "month_warrior", "name": "محارب الشهر", "name_en": "Month Warrior", "description": "سلسلة 30 يوم متتالية", "icon": "⚡", "points": 500, "condition": {"type": "streak_days", "value": 30}},
     "quiz_master": {"id": "quiz_master", "name": "سيد الاختبارات", "name_en": "Quiz Master", "description": "احصل على 100% في 10 اختبارات", "icon": "🎯", "points": 200, "condition": {"type": "perfect_quizzes", "value": 10}},
     "bookworm": {"id": "bookworm", "name": "دودة الكتب", "name_en": "Bookworm", "description": "اقرأ 50 قصة", "icon": "📖", "points": 150, "condition": {"type": "stories_read", "value": 50}},
-    "hsk1_master": {"id": "hsk1_master", "name": "خبير HSK1", "name_en": "HSK1 Master", "description": "أكمل جميع دروس HSK1", "icon": "🥉", "points": 300, "condition": {"type": "hsk_level_completed", "value": 1}},
-    "hsk6_master": {"id": "hsk6_master", "name": "خبير HSK6", "name_en": "HSK6 Master", "description": "أكمل جميع دروس HSK6", "icon": "🏆", "points": 2000, "condition": {"type": "hsk_level_completed", "value": 6}},
+        "hsk1_master": {"id": "hsk1_master", "name": "خبير HSK1", "name_en": "HSK1 Master", "description": "أكمل جميع دروس HSK1", "icon": "🥉", "points": 300, "condition": {"type": "hsk_level_completed", "value": 1}},
+        "hsk6_master": {"id": "hsk6_master", "name": "خبير HSK6", "name_en": "HSK6 Master", "description": "أكمل جميع دروس HSK6", "icon": "🏆", "points": 2000, "condition": {"type": "hsk_level_completed", "value": 6}},
+        "saudi_vision_2030": {"id": "saudi_vision_2030", "name": "نجم الرؤية 2030", "name_en": "Vision 2030 Star", "description": "استخدم المرشد الأكاديمي 10 مرات", "icon": "🇸🇦", "points": 500, "condition": {"type": "academic_advisor_uses", "value": 10}},
+        "qiyas_pro": {"id": "qiyas_pro", "name": "متقن القياس", "name_en": "Qiyas Pro", "description": "أكمل 5 اختبارات قدرات/تحصيلي (وهمية)", "icon": "📝", "points": 750, "condition": {"type": "qiyas_quizzes_completed", "value": 5}},
     "dedicated_student": {"id": "dedicated_student", "name": "الطالب المجتهد", "name_en": "Dedicated Student", "description": "أمضِ 50 ساعة في التعلم", "icon": "⏰", "points": 400, "condition": {"type": "study_hours", "value": 50}},
     "helpful_friend": {"id": "helpful_friend", "name": "الصديق المساعد", "name_en": "Helpful Friend", "description": "ساعد 10 متعلمين آخرين", "icon": "🤝", "points": 250, "condition": {"type": "helped_users", "value": 10}},
     "early_bird": {"id": "early_bird", "name": "الطائر المبكر", "name_en": "Early Bird", "description": "تعلم قبل الساعة 7 صباحاً 10 مرات", "icon": "🌅", "points": 100, "condition": {"type": "early_sessions", "value": 10}},
@@ -831,17 +844,17 @@ async def show_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Build main keyboard
 def build_main_menu():
     items = [
-        ("📚 HSK", "MENU_HSK"),
-        ("🕌 القرآن", "MENU_Quran"),
-        ("🗂️ القاموس", "MENU_Dictionary"),
-        ("📖 القصص", "MENU_Stories"),
-        ("🔤 قواعد", "MENU_GrammarLessons"),
-        ("📑 مراجعة", "MENU_GrammarReview"),
-        ("💬 محادثات", "MENU_Dialogues"),
-        ("🃏 Flashcards", "MENU_Flashcards"),
-        ("❓ كويزات", "MENU_Quizzes"),
-        ("📷 معجم صور", "MENU_PictureDictionary"),
-        ("📱 التطبيقات", "MENU_Apps"),
+        ("📚 التعليم المخصص", "MENU_CUSTOM_EDU"),
+        ("🕌 القرآن", "SKIP_Quran"),
+        ("🗂️ القاموس", "SKIP_Dictionary"),
+        ("📖 القصص", "SKIP_Stories"),
+        ("🔤 قواعد", "SKIP_GrammarLessons"),
+        ("📑 مراجعة", "SKIP_GrammarReview"),
+        ("💬 محادثات", "SKIP_Dialogues"),
+        ("🃏 Flashcards", "SKIP_Flashcards"),
+        ("❓ كويزات", "SKIP_Quizzes"),
+        ("📷 معجم صور", "SKIP_PictureDictionary"),
+        ("🧑‍🏫 مرشد أكاديمي", "MENU_ACADEMIC_ADVISOR"),
         ("🤖 AI Chat", "MENU_AI_CHAT"),
         ("🏆 الإنجازات", "MENU_ACHIEVEMENTS"),
         ("🔊 نطق صوتي", "MENU_TTS"),
@@ -896,18 +909,27 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb.append([InlineKeyboardButton("◀️ رجوع", callback_data="BACK")])
         return await q.edit_message_text("قسم التطبيقات:", reply_markup=InlineKeyboardMarkup(kb))
 
-    # HSK levels menu
-    if d == "MENU_HSK":
-        kb, row = [], []
-        for i in range(1, 7):
-            row.append(InlineKeyboardButton(f"HSK{i}", callback_data=f"SEC_HSK{i}"))
-            if len(row) == 3:
-                kb.append(row)
-                row = []
-        if row:
-            kb.append(row)
-        kb.append([InlineKeyboardButton("◀️ رجوع", callback_data="BACK")])
-        return await q.edit_message_text("اختر مستوى HSK:", reply_markup=InlineKeyboardMarkup(kb))
+	    # Custom Education Menu
+	    if d == "MENU_CUSTOM_EDU":
+	        kb = [
+	            [InlineKeyboardButton("📚 مناهج STEM", callback_data="SKIP_STEM")],
+	            [InlineKeyboardButton("💡 مهارات التفكير النقدي", callback_data="SKIP_CRITICAL_THINKING")],
+	            [InlineKeyboardButton("📝 اختبارات القدرات والتحصيلي", callback_data="SKIP_TESTS")],
+	            [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
+	        ]
+	        return await q.edit_message_text("اختر قسم التعليم المخصص:", reply_markup=InlineKeyboardMarkup(kb))
+
+	    # Academic Advisor shortcut
+	    if d == "MENU_ACADEMIC_ADVISOR":
+	        # Note: This will trigger the AI Chat start and select the mode automatically
+	        context.user_data["ai_mode"] = "academic_advisor"
+	        context.user_data["ai_history"] = []
+	        await q.edit_message_text(
+	            "✅ تم تفعيل وضع المرشد الأكاديمي.\n\n"
+	            "اسأل عن التخصصات، اختبارات القدرات، أو أي نصيحة دراسية!\n"
+	            "استخدم /stop_ai لإنهاء المحادثة."
+	        )
+	        return
 
     # Back to main
     if d == "BACK":

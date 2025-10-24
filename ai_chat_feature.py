@@ -35,7 +35,8 @@ SYSTEM_PROMPTS = {
     - ترجم بدقة وبشكل طبيعي
     - قدم ترجمات بديلة إن وجدت
     - اشرح السياق الثقافي عند الحاجة
-    - قدم النطق بالبينيين (Pinyin)"""
+    - قدم النطق بالبينيين (Pinyin)""",
+    "academic_advisor": """أنت مستشار أكاديمي خبير في نظام التعليم السعودي (الابتدائي، المتوسط، الثانوي، الجامعي). مهمتك هي تقديم إجابات دقيقة ومفصلة ونصائح تحفيزية للطلاب حول مساراتهم التعليمية، وأفضل طرق الاستعداد لاختبارات القدرات والتحصيلي، وكيفية اختيار التخصصات الجامعية بما يتوافق مع رؤية 2030. استخدم لغة عربية فصحى ومحفزة."""
 }
 
 async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -47,6 +48,9 @@ async def ai_chat_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("🔤 مترجم", callback_data="ai_mode_translator"),
+            InlineKeyboardButton("🧑‍🏫 مرشد أكاديمي", callback_data="ai_mode_academic_advisor")
+        ],
+        [
             InlineKeyboardButton("❌ إلغاء", callback_data="ai_cancel")
         ]
     ]
@@ -79,7 +83,8 @@ async def ai_mode_select(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mode_names = {
         "teacher": "🎓 وضع المعلم",
         "conversation": "💬 وضع المحادثة", 
-        "translator": "🔤 وضع المترجم"
+        "translator": "🔤 وضع المترجم",
+        "academic_advisor": "🧑‍🏫 وضع المرشد الأكاديمي"
     }
     
     await query.edit_message_text(
@@ -167,7 +172,8 @@ async def ai_chat_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     mode_names = {
         "teacher": "🎓 وضع المعلم",
         "conversation": "💬 وضع المحادثة", 
-        "translator": "🔤 وضع المترجم"
+        "translator": "🔤 وضع المترجم",
+        "academic_advisor": "🧑‍🏫 وضع المرشد الأكاديمي"
     }
     
     await update.message.reply_text(
