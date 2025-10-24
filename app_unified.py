@@ -1,4 +1,3 @@
-
 import os
 import asyncio
 import threading
@@ -909,27 +908,27 @@ async def main_h(update: Update, context: ContextTypes.DEFAULT_TYPE):
         kb.append([InlineKeyboardButton("◀️ رجوع", callback_data="BACK")])
         return await q.edit_message_text("قسم التطبيقات:", reply_markup=InlineKeyboardMarkup(kb))
 
-	    # Custom Education Menu
-	    if d == "MENU_CUSTOM_EDU":
-	        kb = [
-	            [InlineKeyboardButton("📚 مناهج STEM", callback_data="SKIP_STEM")],
-	            [InlineKeyboardButton("💡 مهارات التفكير النقدي", callback_data="SKIP_CRITICAL_THINKING")],
-	            [InlineKeyboardButton("📝 اختبارات القدرات والتحصيلي", callback_data="SKIP_TESTS")],
-	            [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
-	        ]
-	        return await q.edit_message_text("اختر قسم التعليم المخصص:", reply_markup=InlineKeyboardMarkup(kb))
+    # Custom Education Menu
+    if d == "MENU_CUSTOM_EDU":
+        kb = [
+            [InlineKeyboardButton("📚 مناهج STEM", callback_data="SKIP_STEM")],
+            [InlineKeyboardButton("💡 مهارات التفكير النقدي", callback_data="SKIP_CRITICAL_THINKING")],
+            [InlineKeyboardButton("📝 اختبارات القدرات والتحصيلي", callback_data="SKIP_TESTS")],
+            [InlineKeyboardButton("◀️ رجوع", callback_data="BACK")]
+        ]
+        return await q.edit_message_text("اختر قسم التعليم المخصص:", reply_markup=InlineKeyboardMarkup(kb))
 
-	    # Academic Advisor shortcut
-	    if d == "MENU_ACADEMIC_ADVISOR":
-	        # Note: This will trigger the AI Chat start and select the mode automatically
-	        context.user_data["ai_mode"] = "academic_advisor"
-	        context.user_data["ai_history"] = []
-	        await q.edit_message_text(
-	            "✅ تم تفعيل وضع المرشد الأكاديمي.\n\n"
-	            "اسأل عن التخصصات، اختبارات القدرات، أو أي نصيحة دراسية!\n"
-	            "استخدم /stop_ai لإنهاء المحادثة."
-	        )
-	        return
+    # Academic Advisor shortcut
+    if d == "MENU_ACADEMIC_ADVISOR":
+        # Note: This will trigger the AI Chat start and select the mode automatically
+        context.user_data["ai_mode"] = "academic_advisor"
+        context.user_data["ai_history"] = []
+        await q.edit_message_text(
+            "✅ تم تفعيل وضع المرشد الأكاديمي.\n\n"
+            "اسأل عن التخصصات، اختبارات القدرات، أو أي نصيحة دراسية!\n"
+            "استخدم /stop_ai لإنهاء المحادثة."
+        )
+        return
 
     # Back to main
     if d == "BACK":
