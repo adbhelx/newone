@@ -1202,7 +1202,7 @@ app = Flask(__name__)
 
 # Telegram Bot Setup
 application = ApplicationBuilder().token(TOKEN).build()
-application.initialize() # Initialize immediately after building
+# application.initialize() # تم إزالته لأنه غير ضروري ويسبب تحذيرات
 logger.info("Telegram bot Application initialized.")
 
 # Add handlers
