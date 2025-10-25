@@ -1444,8 +1444,9 @@ telegram_bot_thread.daemon = True # Allow main program to exit even if thread is
 
 # Start the bot thread globally, outside of if __name__ == '__main__':
 # This ensures it runs when gunicorn imports the module
-telegram_bot_thread.start()
-logger.info("Telegram bot thread started.")
+if not telegram_bot_thread.is_alive():
+    telegram_bot_thread.start()
+    logger.info("Telegram bot thread started.")
 
 if __name__ == '__main__':
     # Run Flask app only if executed directly
